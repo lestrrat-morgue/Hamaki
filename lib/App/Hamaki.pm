@@ -1,7 +1,7 @@
-package App::Tatsunami;
+package App::Hamaki;
 use Moose;
 use Tatsumaki::Server;
-use Tatsunami;
+use Hamaki;
 use Try::Tiny;
 
 with qw(MooseX::Getopt MooseX::SimpleConfig);
@@ -21,7 +21,7 @@ has debug => (
 sub run {
     my $self = shift;
 
-    my $tatsunami = Tatsunami->new(
+    my $tatsunami = Hamaki->new(
         debug => $self->debug,
         config => $self->config
     );

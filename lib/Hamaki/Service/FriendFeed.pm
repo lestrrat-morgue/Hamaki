@@ -1,4 +1,4 @@
-package Tatsunami::service::FriendFeed;
+package Hamaki::service::FriendFeed;
 use Moose;
 use namespace::clean -except => qw(meta);
 

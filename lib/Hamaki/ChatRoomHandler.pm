@@ -1,4 +1,4 @@
-package Tatsunami::ChatRoomHandler;
+package Hamaki::ChatRoomHandler;
 use base qw(Tatsumaki::Handler);
 
 sub get {

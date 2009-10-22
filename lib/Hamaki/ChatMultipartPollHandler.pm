@@ -1,4 +1,4 @@
-package Tatsunami::ChatMultipartPollHandler;
+package Hamaki::ChatMultipartPollHandler;
 use base qw(Tatsumaki::Handler);
 __PACKAGE__->asynchronous(1);
 

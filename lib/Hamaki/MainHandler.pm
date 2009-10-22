@@ -1,4 +1,4 @@
-package Tatsunami::MainHandler;
+package Hamaki::MainHandler;
 use base qw(Tatsumaki::Handler);
 
 sub get {

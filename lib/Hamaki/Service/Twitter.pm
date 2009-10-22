@@ -1,9 +1,9 @@
-package Tatsunami::Service::Twitter;
+package Hamaki::Service::Twitter;
 use Moose;
 use AnyEvent::HTTP;
 use MIME::Base64;
 use Tatsumaki::MessageQueue;
-use Tatsunami::ChatPostHandler;
+use Hamaki::ChatPostHandler;
 use Try::Tiny;
 use namespace::clean -except => qw(meta);
 
@@ -31,7 +31,7 @@ sub BUILD {
                 type   => "message", address => 'twitter.com', time => scalar localtime,
                 name   => $tweet->{user}{name},
                 avatar => $tweet->{user}{profile_image_url},
-                html   => Tatsunami::ChatPostHandler->format_message($tweet->{text}), # FIXME
+                html   => Hamaki::ChatPostHandler->format_message($tweet->{text}), # FIXME
                 ident  => "http://twitter.com/$tweet->{user}{screen_name}/status/$tweet->{id}",
             });
         };

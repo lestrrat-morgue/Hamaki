@@ -1,4 +1,4 @@
-package Tatsunami;
+package Hamaki;
 use Moose;
 use Plack::Middleware::Static;
 use Tatsumaki;
@@ -6,12 +6,12 @@ use Tatsumaki::Application;
 use Tatsumaki::Error;
 use Tatsumaki::HTTPClient;
 use Tatsumaki::Middleware::BlockingFallback;
-use Tatsunami::Filter;
-use Tatsunami::ChatPollHandler;
-use Tatsunami::ChatMultipartPollHandler;
-use Tatsunami::ChatPostHandler;
-use Tatsunami::ChatRoomHandler;
-use Tatsunami::MainHandler;
+use Hamaki::Filter;
+use Hamaki::ChatPollHandler;
+use Hamaki::ChatMultipartPollHandler;
+use Hamaki::ChatPostHandler;
+use Hamaki::ChatRoomHandler;
+use Hamaki::MainHandler;
 use namespace::clean -except => qw(meta);
 
 extends 'Tatsumaki::Application';
@@ -29,7 +29,7 @@ has debug => (
 
 has filter => (
     is => 'rw',
-    isa => 'Tatsunami::Filter',
+    isa => 'Hamaki::Filter',
 );
 
 has services => (
@@ -54,13 +54,13 @@ sub BUILDARGS {
     }
 
     push @$rules, (
-        '/stream'              => 'Tatsunami::StreamWriter',
-        '/feed/(\w+)'          => 'Tatsunami::FeedHandler',
-        '/chat/(\w+)/poll'     => 'Tatsunami::ChatPollHandler',
-        '/chat/(\w+)/mxhrpoll' => 'Tatsunami::ChatMultipartPollHandler',
-        '/chat/(\w+)/post'     => 'Tatsunami::ChatPostHandler',
-        '/chat/(\w+)'          => 'Tatsunami::ChatRoomHandler',
-        '/'                    => 'Tatsunami::MainHandler',
+        '/stream'              => 'Hamaki::StreamWriter',
+        '/feed/(\w+)'          => 'Hamaki::FeedHandler',
+        '/chat/(\w+)/poll'     => 'Hamaki::ChatPollHandler',
+        '/chat/(\w+)/mxhrpoll' => 'Hamaki::ChatMultipartPollHandler',
+        '/chat/(\w+)/post'     => 'Hamaki::ChatPostHandler',
+        '/chat/(\w+)'          => 'Hamaki::ChatRoomHandler',
+        '/'                    => 'Hamaki::MainHandler',
     );
     unshift @_, $rules;
     return $class->SUPER::BUILDARGS(@_);
@@ -117,7 +117,7 @@ __END__
 
 =head1 NAME
 
-Tatsunami - Tsunami of tweets based on Tatsumaki
+Hamaki - Tsunami of tweets based on Tatsumaki
 
 =head1 SYNOPSIS
 

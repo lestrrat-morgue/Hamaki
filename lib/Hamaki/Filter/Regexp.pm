@@ -1,8 +1,8 @@
-package Tatsunami::Filter::Regexp;
+package Hamaki::Filter::Regexp;
 use Moose;
 use namespace::clean -except => qw(meta);
 
-extends 'Tatsunami::Filter';
+extends 'Hamaki::Filter';
 
 has default => (
     is => 'ro',

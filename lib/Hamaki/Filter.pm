@@ -1,4 +1,4 @@
-package Tatsunami::Filter;
+package Hamaki::Filter;
 use Moose;
 use namespace::clean -except => qw(meta);
 

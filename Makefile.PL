@@ -1,6 +1,6 @@
 use inc::Module::Install;
 
-name('Tatsunami');
+name('Hamaki');
 
 requires 'AnyEvent::HTTP';
 requires 'Encode';

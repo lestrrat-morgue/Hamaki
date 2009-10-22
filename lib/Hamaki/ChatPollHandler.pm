@@ -1,5 +1,5 @@
 
-package Tatsunami::ChatPollHandler;
+package Hamaki::ChatPollHandler;
 use Moose;
 use Tatsumaki::MessageQueue;
 use Try::Tiny;

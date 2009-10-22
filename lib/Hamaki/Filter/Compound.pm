@@ -1,8 +1,8 @@
-package Tatsunami::Filter::Compound;
+package Hamaki::Filter::Compound;
 use Moose;
 use namespace::clean -except => qw(meta);
 
-extends 'Tatsunami::Filter';
+extends 'Hamaki::Filter';
 
 has filters => (
     is => 'ro',

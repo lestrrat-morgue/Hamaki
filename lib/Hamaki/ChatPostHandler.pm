@@ -1,4 +1,4 @@
-package Tatsunami::ChatPostHandler;
+package Hamaki::ChatPostHandler;
 use Moose;
 use Encode ();
 use HTML::Entities;

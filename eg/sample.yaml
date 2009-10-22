@@ -1,0 +1,18 @@
+config:
+    port: 9999
+    services:
+        twitter:
+            class: Tatsunami::Service::Twitter
+            username: CHANGEME
+            password: CHANGEME
+
+# Enable if you want debug output
+# debug: 1
+
+# Suppose you only want messages with links in it...
+#    filter: 
+#        class: Tatsunami::Filter::Regexp
+#        regexp_map:
+#            html: 'http://'
+            
+        

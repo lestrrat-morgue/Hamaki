@@ -5,6 +5,6 @@ BEGIN {
         unshift @INC, 'lib';
     }
 }
-use App::Tatsunami;
+use App::Hamaki;
 
-App::Tatsunami->new_with_options()->run();
+App::Hamaki->new_with_options()->run();

@@ -31,7 +31,10 @@ function doPost(el1, el) {
   return;
 }
 
+var maxPosts = 50;
+
 $(function(){
+  var postCount = 0;
   var onNewEvent = function(e) {
     try {
       var src    = e.avatar || ("http://www.gravatar.com/avatar/" + $.md5(e.ident || 'foo'));
@@ -53,6 +56,13 @@ $(function(){
 
       var meta = $('<td/>').addClass('meta').text(' (' + e.time + ' from ' + e.address + ')');
       $('#messages').prepend($('<tr/>').addClass('message').append(avatar).append(message).append(meta));
+      postCount++;
+      console.log(postCount + " <-> " + maxPosts);
+      while (postCount > maxPosts) {
+        console.log( "removing last child" );
+        $('#messages tr:last-child').remove();
+        postCount--;
+      }
     } catch(e) { if (console) console.log(e) };
   }
 

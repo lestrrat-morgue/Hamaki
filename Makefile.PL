@@ -7,6 +7,8 @@ requires 'Encode';
 requires 'HTML::Entities';
 requires 'MIME::Base64';
 requires 'Moose';
+requires 'MooseX::Getopt';
+requires 'MooseX::SimpleConfig';
 requires 'Plack::Middleware::Static';
 requires 'Tatsumaki::Application';
 requires 'Tatsumaki::Error';

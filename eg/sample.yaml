@@ -1,6 +1,7 @@
 # Enable if you want debug output
 # debug: 1
 config:
+    email: CHANGEME # This will be used to display your gravatar
     port: 9999
     services:
         twitter:

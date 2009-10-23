@@ -1,6 +1,9 @@
 package Hamaki::Service::Twitter;
 use Moose;
 use AnyEvent::HTTP;
+use AnyEvent::Twitter;
+use AnyEvent::Twitter::Stream;
+use Hamaki::Service::Twitter::ChatPostHandler;
 use MIME::Base64;
 use Tatsumaki::MessageQueue;
 use Try::Tiny;
@@ -20,6 +23,40 @@ has password => (
     required => 1,
 );
 
+has use_timeline => (
+    is => 'ro', 
+    isa => 'Bool',
+    default => 0,
+);
+
+has client => (
+    is => 'ro',
+    isa => 'AnyEvent::Twitter',
+    lazy_build => 1,
+);
+
+sub _build_client {
+    my $self = shift;
+    return AnyEvent::Twitter->new(
+        username => $self->username,
+        password => $self->password,
+    );
+}
+
+override get_handlers => sub {
+    my $self = shift;
+    my @handlers = super();
+
+    my $name = $self->name;
+    foreach my $h (@handlers) {
+        if ($h->{path} eq "(?-xism:/chat/($name)/post)") {
+            $h->{handler} = 'Hamaki::Service::Twitter::ChatPostHandler';
+            $h->{extra_args} = [ service => $self ]
+        }
+    }
+    return @handlers;
+};
+
 # This formats for our chat room view
 sub format_chat_message {
     my ($self, $text) = @_;
@@ -37,6 +74,28 @@ sub format_chat_message {
     ,egx;
 
     return $text;
+}
+
+sub get_followers {
+    my $self = shift;
+
+    my $uri = "http://twitter.com/friends/ids/" . $self->username . ".xml";
+    my @followers;
+    my %headers = (
+        Authorization => "Basic " . encode_base64 (join ':', $self->username, $self->password)
+    );
+
+    my $condvar = AnyEvent->condvar;
+    my $guard = http_get $uri, \%headers, sub {
+        my $xml = shift;
+        while ($xml =~ /<id>(\d+)<\/id>/g) {
+            push @followers, $1;
+        }
+        $condvar->send; 
+    };
+
+    $condvar->recv; 
+    return @followers;
 }
 
 sub start {
@@ -59,44 +118,24 @@ sub start {
         };
     };
 
-    if (try { require AnyEvent::Twitter::Stream }) {
-        my $uri = "http://twitter.com/friends/ids/" . $self->username . ".xml";
-        my @follow;
-        my %headers = (
-            Authorization => "Basic " . encode_base64 (join ':', $self->username, $self->password)
-        );
+    my @followers = $self->get_followers();
+    my $listener; $listener = AnyEvent::Twitter::Stream->new(
+        username => $self->username,
+        password => $self->password,
+        method   => "filter",
+        follow   => join(',', @followers),
+        on_tweet => $tweet_cb->("twitter"),
+        on_eof => sub {
+            warn "AnyEvent::Twitter::Stream terminated";
+            undef $listener;
+        },
+    );
 
-        my $condvar = AnyEvent->condvar;
-        my $guard = http_get $uri, \%headers, sub {
-            my $xml = shift;
-            while ($xml =~ /<id>(\d+)<\/id>/g) {
-                push @follow, $1;
-            }
-            $condvar->send; 
-        };
+    warn "Twitter stream is available at /chat/twitter\n";
 
-        $condvar->recv; 
-        my $listener; $listener = AnyEvent::Twitter::Stream->new(
-            username => $self->username,
-            password => $self->password,
-            method   => "filter",
-            follow   => join(',', @follow),
-            on_tweet => $tweet_cb->("twitter"),
-            on_eof => sub {
-                warn "AnyEvent::Twitter::Stream terminated";
-                undef $listener;
-            },
-        );
-
-        warn "Twitter stream is available at /chat/twitter\n";
-    }
-
-    if (try { require AnyEvent::Twitter }) {
+    my $client = $self->client();
+    if ( $self->use_timeline ) { # XXX Bad. Bad.
         my $cb = $tweet_cb->("twitter_friends");
-        my $client = AnyEvent::Twitter->new(
-            username => $self->username,
-            password => $self->password,
-        );
         $client->reg_cb(statuses_friends => sub {
             scalar $client;
             my $self = shift;

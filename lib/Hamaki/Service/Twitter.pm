@@ -1,7 +1,6 @@
 package Hamaki::Service::Twitter;
 use Moose;
 use AnyEvent::HTTP;
-use Hamaki::ChatPostHandler;
 use MIME::Base64;
 use Tatsumaki::MessageQueue;
 use Try::Tiny;
@@ -21,6 +20,25 @@ has password => (
     required => 1,
 );
 
+# This formats for our chat room view
+sub format_chat_message {
+    my ($self, $text) = @_;
+
+    $text =~ s, (https?://\S+) | (&(?!(?:amp|lt|gt|quot);)) | ([<>"']+) | @([\w_]+) | \#([\w_]+),
+        $1 ? do {
+            my $url = HTML::Entities::encode($1);
+            qq(<a target="_blank" href="$url">$url</a>)
+        } :
+        $2 ? "&amp;" :
+        $3 ? HTML::Entities::encode($3) :
+        $4 ? qq(\@<a target="_blank" href="http://twitter.com/$4">$4</a>) :
+        $5 ? qq(#<a target="_blank" href="http://twitter.com/search?q=%23$5">$5</a>) :
+        ''
+    ,egx;
+
+    return $text;
+}
+
 sub start {
     my $self = shift;
     my $tweet_cb = sub {
@@ -35,7 +53,7 @@ sub start {
                 time    => scalar localtime,
                 name    => $tweet->{user}{name},
                 avatar  => $tweet->{user}{profile_image_url},
-                html    => Hamaki::ChatPostHandler->format_message($tweet->{text}), # FIXME
+                html    => $self->format_chat_message($tweet->{text}),
                 ident   => "http://twitter.com/$tweet->{user}{screen_name}/status/$tweet->{id}",
             });
         };

@@ -1,5 +1,29 @@
-if ($ENV{SUPERFEEDR_JID} && try { require AnyEvent::Superfeedr }) {
+package Hamaki::Service::Superfeedr;
+use Moose;
+use AnyEvent::Superfeedr;
+use Tatsumaki::MessageQueue;
+use namespace::clean -except => qw(meta);
+
+extends 'Hamaki::Service';
+
+has jid => (
+    is => 'ro',
+    isa => 'Str',
+    required => 1,
+);
+
+has password => (
+    is => 'ro',
+    isa => 'Str',
+    required => 1,
+);
+
+sub start {
+    my $self = shift;
+
+    # XXX Hmm? is this kosher?
     $XML::Atom::ForceUnicode = 1;
+
     my $mq = Tatsumaki::MessageQueue->instance("superfeedr");
     my $entry_cb = sub {
         my($entry, $feed_uri) = @_;
@@ -14,8 +38,8 @@ if ($ENV{SUPERFEEDR_JID} && try { require AnyEvent::Superfeedr }) {
     };
     my $superfeedr; $superfeedr = AnyEvent::Superfeedr->new(
         debug => 0,
-        jid => $ENV{SUPERFEEDR_JID},
-        password => $ENV{SUPERFEEDR_PASSWORD},
+        jid => $self->jid,
+        password => $self->password,
         on_notification => sub {
             scalar $superfeedr;
             my $notification = shift;
@@ -27,4 +51,6 @@ if ($ENV{SUPERFEEDR_JID} && try { require AnyEvent::Superfeedr }) {
     warn "Superfeedr channel is available at /chat/superfeedr\n";
 }
 
+__PACKAGE__->meta->make_immutable();
 
+1;

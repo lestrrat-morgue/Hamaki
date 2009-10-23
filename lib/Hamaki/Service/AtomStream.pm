@@ -1,4 +1,13 @@
-if ($ENV{ATOM_STREAM} && try { require AnyEvent::Atom::Stream }) {
+package Hamaki::Service::AtomStream;
+use Moose;
+use AnyEvent::Atom::Stream;
+use namespace::clean -except => qw(meta);
+
+extends 'Hamaki::Service';
+
+sub start {
+    my $self = shift;
+
     my $mq = Tatsumaki::MessageQueue->instance("sixapart");
     my $entry_cb = sub {
         my $feed = shift;
@@ -21,3 +30,6 @@ if ($ENV{ATOM_STREAM} && try { require AnyEvent::Atom::Stream }) {
     warn "Six Apart update stream is available at /chat/sixapart\n";
 }
 
+__PACKAGE__->meta->make_immutable();
+
+1;

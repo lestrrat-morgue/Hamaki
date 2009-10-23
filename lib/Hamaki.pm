@@ -42,7 +42,11 @@ has services => (
 
 sub add_service {
     my ($self, $name, $service) = @_;
+
+    unshift @{ $self->_rules }, $service->get_handlers();
+
     $self->services->{$name} = $service;
+
 }
 
 sub BUILDARGS {
@@ -59,10 +63,6 @@ sub BUILDARGS {
     push @$rules, (
         "/stream"                   => 'Hamaki::StreamWriter',
         "/feed/(\\w+)"              => 'Hamaki::FeedHandler',
-        "/chat/($chat_re)/poll"     => 'Hamaki::ChatPollHandler',
-        "/chat/($chat_re)/mxhrpoll" => 'Hamaki::ChatMultipartPollHandler',
-        "/chat/($chat_re)/post"     => 'Hamaki::ChatPostHandler',
-        "/chat/($chat_re)"          => 'Hamaki::ChatRoomHandler',
         "/"                         => 'Hamaki::MainHandler',
     );
     unshift @_, $rules;
@@ -87,7 +87,7 @@ sub BUILD {
         my $class = delete $config->{class};
         Class::MOP::load_class($class);
 
-        $self->add_service( $name, $class->new($config) );
+        $self->add_service( $name, $class->new({ %$config, name => $name }) );
     }
 
     return $self;
@@ -111,6 +111,21 @@ sub to_app {
 
     return $app;
 }
+
+override dispatch => sub {
+    my($self, $path) = @_;
+
+    for my $rule (@{$self->_rules}) {
+        if ($path =~ $rule->{path}) {
+            my $args = [ $1, $2, $3, $4, $5, $6, $7, $8, $9 ];
+            my @extra = $rule->{extra_args} ? @{$rule->{extra_args}} : ();
+            return sub { $rule->{handler}->new(@extra, @_, args => $args) }
+        }
+    }
+
+    return;
+};
+
 
 __PACKAGE__->meta->make_immutable();
 

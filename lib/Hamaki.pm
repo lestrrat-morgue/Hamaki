@@ -14,6 +14,8 @@ use Hamaki::ChatRoomHandler;
 use Hamaki::MainHandler;
 use namespace::clean -except => qw(meta);
 
+our $VERSION = '0.00001';
+
 extends 'Tatsumaki::Application';
 
 has config => (

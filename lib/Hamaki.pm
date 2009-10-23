@@ -53,14 +53,15 @@ sub BUILDARGS {
         $rules = [];
     }
 
+    my $chat_re = '[\w\.\-]+';
     push @$rules, (
-        '/stream'              => 'Hamaki::StreamWriter',
-        '/feed/(\w+)'          => 'Hamaki::FeedHandler',
-        '/chat/(\w+)/poll'     => 'Hamaki::ChatPollHandler',
-        '/chat/(\w+)/mxhrpoll' => 'Hamaki::ChatMultipartPollHandler',
-        '/chat/(\w+)/post'     => 'Hamaki::ChatPostHandler',
-        '/chat/(\w+)'          => 'Hamaki::ChatRoomHandler',
-        '/'                    => 'Hamaki::MainHandler',
+        "/stream"                   => 'Hamaki::StreamWriter',
+        "/feed/(\\w+)"              => 'Hamaki::FeedHandler',
+        "/chat/($chat_re)/poll"     => 'Hamaki::ChatPollHandler',
+        "/chat/($chat_re)/mxhrpoll" => 'Hamaki::ChatMultipartPollHandler',
+        "/chat/($chat_re)/post"     => 'Hamaki::ChatPostHandler',
+        "/chat/($chat_re)"          => 'Hamaki::ChatRoomHandler',
+        "/"                         => 'Hamaki::MainHandler',
     );
     unshift @_, $rules;
     return $class->SUPER::BUILDARGS(@_);

@@ -1,3 +1,5 @@
+# Enable if you want debug output
+# debug: 1
 config:
     port: 9999
     services:
@@ -5,10 +7,12 @@ config:
             class: Tatsunami::Service::Twitter
             username: CHANGEME
             password: CHANGEME
-
-# Enable if you want debug output
-# debug: 1
-
+# If you want an IRC service
+#        irc:
+#            class: Hamaki::Service::IRC
+#            host: CHANGEME
+#            nickname: CHANGEME
+#            password: CHANGEME
 # Suppose you only want messages with links in it...
 #    filter: 
 #        class: Tatsunami::Filter::Regexp

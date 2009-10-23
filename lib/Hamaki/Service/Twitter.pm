@@ -1,11 +1,13 @@
 package Hamaki::Service::Twitter;
 use Moose;
 use AnyEvent::HTTP;
+use Hamaki::ChatPostHandler;
 use MIME::Base64;
 use Tatsumaki::MessageQueue;
-use Hamaki::ChatPostHandler;
 use Try::Tiny;
 use namespace::clean -except => qw(meta);
+
+extends 'Hamaki::Service';
 
 has username => (
     is => 'ro',
@@ -19,7 +21,7 @@ has password => (
     required => 1,
 );
 
-sub BUILD {
+sub start {
     my $self = shift;
     my $tweet_cb = sub {
         my $channel = shift;
@@ -28,11 +30,13 @@ sub BUILD {
             my $tweet = shift;
             return unless $tweet->{user}{screen_name};
             $mq->publish({
-                type   => "message", address => 'twitter.com', time => scalar localtime,
-                name   => $tweet->{user}{name},
-                avatar => $tweet->{user}{profile_image_url},
-                html   => Hamaki::ChatPostHandler->format_message($tweet->{text}), # FIXME
-                ident  => "http://twitter.com/$tweet->{user}{screen_name}/status/$tweet->{id}",
+                type    => "message",
+                address => 'twitter.com',
+                time    => scalar localtime,
+                name    => $tweet->{user}{name},
+                avatar  => $tweet->{user}{profile_image_url},
+                html    => Hamaki::ChatPostHandler->format_message($tweet->{text}), # FIXME
+                ident   => "http://twitter.com/$tweet->{user}{screen_name}/status/$tweet->{id}",
             });
         };
     };

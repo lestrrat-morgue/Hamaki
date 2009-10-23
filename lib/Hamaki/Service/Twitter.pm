@@ -112,6 +112,7 @@ sub start {
                 time    => scalar localtime,
                 name    => $tweet->{user}{name},
                 avatar  => $tweet->{user}{profile_image_url},
+                text    => $tweet->{text},
                 html    => $self->format_chat_message($tweet->{text}),
                 ident   => "http://twitter.com/$tweet->{user}{screen_name}/status/$tweet->{id}",
             });

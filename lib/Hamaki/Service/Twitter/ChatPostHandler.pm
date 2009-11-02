@@ -23,17 +23,22 @@ sub post {
         return $self->write({ success => 0 });
     }
 
-    $self->service->client->update_status( $text );
+    $self->service->client->update_status( $text, sub {
+        if ($_[3]) {
+            warn "Failed to tweet: $_[3]";
+            return;
+        }
 
-    # bring it back to the application
-    my $html = $self->service->format_chat_message($text);
-    my $mq = Tatsumaki::MessageQueue->instance($channel);
-    $mq->publish({
-        type => "message", html => $html, ident => $v->{ident},
-        avatar => $v->{avatar}, name => $v->{name},
-        address => $self->request->address, time => scalar localtime(time),
-    });
-    $self->write({ success => 1 });
+        # bring it back to the application
+        my $html = $self->service->format_chat_message($text);
+        my $mq = Tatsumaki::MessageQueue->instance($channel);
+        $mq->publish({
+            type => "message", html => $html, ident => $v->{ident},
+            avatar => $v->{avatar}, name => $v->{name},
+            address => $self->request->address, time => scalar localtime(time),
+        });
+        $self->write({ success => 1 });
+    } );
 }
 
 __PACKAGE__->meta->make_immutable();

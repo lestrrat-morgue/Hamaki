@@ -4,9 +4,11 @@ use AnyEvent::HTTP;
 use AnyEvent::Twitter;
 use AnyEvent::Twitter::Stream;
 use Hamaki::Service::Twitter::ChatPostHandler;
+use Hamaki::Service::Twitter::Stream;
 use MIME::Base64;
 use Tatsumaki::MessageQueue;
 use Try::Tiny;
+use constant MAXBACKLOG => 100;
 use namespace::clean -except => qw(meta);
 
 extends 'Hamaki::Service';
@@ -120,17 +122,27 @@ sub start {
     };
 
     my @followers = $self->get_followers();
-    my $listener; $listener = AnyEvent::Twitter::Stream->new(
+    my $listener; $listener = 
+        Hamaki::Service::Twitter::Stream->new(
+#AnyEvent::Twitter::Stream->new(
         username => $self->username,
         password => $self->password,
-        method   => "filter",
-        follow   => join(',', @followers),
+        args => [ follow   => join(',', @followers) ],
         on_tweet => $tweet_cb->("twitter"),
+        on_error => sub {
+            my $self = shift;
+            $self->clear_connection_guard;
+            AE::timer 5, 0, sub {
+                warn "attempting to reconnect...";
+                $self->start_filter();
+            };
+        },
         on_eof => sub {
             warn "AnyEvent::Twitter::Stream terminated";
             undef $listener;
         },
     );
+    $listener->start_filter();
 
     warn "Twitter stream is available at /chat/twitter\n";
 
@@ -146,6 +158,23 @@ sub start {
         $client->start;
         warn "Twitter Friends timeline is available at /chat/twitter_friends\n";
     }
+
+    # If messages were not consumed, this process will just keep on 
+    # consuming memory. pop the messages once in a while
+    AnyEvent->timer(
+        after => 60,
+        interval => 60, 
+        cb => sub { 
+            warn "cleanup!";
+            my $instance = Tatsumaki::MessageQueue->instance('twitter');
+            my $tossed = 0;
+            my $backlog = $instance->backlog;
+            if (scalar @$backlog > MAXBACKLOG) {
+                warn "tossing ". (@$backlog - MAXBACKLOG);
+                splice(@$backlog, MAXBACKLOG, scalar @$backlog);
+            }
+        }
+    );
 }
 
 1;

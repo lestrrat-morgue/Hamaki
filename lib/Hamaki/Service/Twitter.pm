@@ -130,8 +130,7 @@ sub start {
         args => [ follow   => join(',', @followers) ],
         on_tweet => $tweet_cb->("twitter"),
         on_error => sub {
-            my $self = shift;
-            $self->clear_connection_guard;
+            $listener->clear_connection_guard;
             AE::timer 5, 0, sub {
                 warn "attempting to reconnect...";
                 $self->start_filter();

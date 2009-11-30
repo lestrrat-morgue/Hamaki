@@ -5,7 +5,7 @@ config:
     port: 9999
     services:
         twitter:
-            class: Tatsunami::Service::Twitter
+            class: Hamaki::Service::Twitter
             username: CHANGEME
             password: CHANGEME
 # If you want an IRC service
@@ -16,8 +16,6 @@ config:
 #            password: CHANGEME
 # Suppose you only want messages with links in it...
 #    filter: 
-#        class: Tatsunami::Filter::Regexp
+#        class: Hamaki::Filter::Regexp
 #        regexp_map:
 #            html: 'http://'
-            
-        

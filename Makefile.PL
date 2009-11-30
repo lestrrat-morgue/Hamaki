@@ -10,13 +10,7 @@ requires 'Moose';
 requires 'MooseX::Getopt';
 requires 'MooseX::SimpleConfig';
 requires 'Plack::Middleware::Static';
-requires 'Tatsumaki::Application';
-requires 'Tatsumaki::Error';
-requires 'Tatsumaki::HTTPClient';
-requires 'Tatsumaki::MessageQueue';
-requires 'Tatsumaki::Middleware::BlockingFallback';
-requires 'Tatsumaki::Server';
-requires 'Tatsumaki';
+requires 'Tatsumaki' => '0.1003';
 requires 'Try::Tiny';
 requires 'namespace::clean';
 

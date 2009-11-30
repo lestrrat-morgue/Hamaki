@@ -113,13 +113,14 @@ sub to_app {
 }
 
 override dispatch => sub {
-    my($self, $path) = @_;
+    my($self, $req) = @_;
 
+    my $path = $req->path;
     for my $rule (@{$self->_rules}) {
         if ($path =~ $rule->{path}) {
             my $args = [ $1, $2, $3, $4, $5, $6, $7, $8, $9 ];
             my @extra = $rule->{extra_args} ? @{$rule->{extra_args}} : ();
-            return sub { $rule->{handler}->new(@extra, @_, args => $args) }
+            return $rule->{handler}->new(@extra, @_, args => $args, request => $req, application => $self);
         }
     }
 
